@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: task-tracker
+
+  datasource:
+    url: jdbc:h2:file:/data/mephi12;
+    username: mephi12
+    password: pass
+    driver-class-name: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: 8083
