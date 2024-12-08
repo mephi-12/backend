@@ -1,5 +1,6 @@
 package ru.command.mephi12
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import ru.command.mephi12.dto.ProblemRequest
@@ -13,12 +14,12 @@ class Mephi12Application
 
 fun main(args: Array<String>) {
 
-    val respose = MinorDegreesProblemSolverServiceImpl().solve(ProblemRequest(
-        type = ProblemType.MINOR_DEGREES,
-        message = arrayListOf(true, false, true, true, false, false)
+    val respose = SuperIncreasingProblemSolverServiceImpl().solve(ProblemRequest(
+        type = ProblemType.SUPER_INCREASING,
+//        message = arrayListOf(true, false, true, true, false, false)
     ))
 
-    println(respose)
+    println(respose.let { jacksonObjectMapper().writeValueAsString(respose) })
 
     runApplication<Mephi12Application>(*args)
 }
