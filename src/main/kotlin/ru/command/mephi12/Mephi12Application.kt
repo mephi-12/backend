@@ -3,23 +3,27 @@ package ru.command.mephi12
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
-import ru.command.mephi12.dto.ProblemRequest
-import ru.command.mephi12.dto.ProblemType
-import ru.command.mephi12.service.problems.MajorDegreesProblemSolverServiceImpl
-import ru.command.mephi12.service.problems.MinorDegreesProblemSolverServiceImpl
-import ru.command.mephi12.service.problems.SuperIncreasingProblemSolverServiceImpl
+import ru.command.mephi12.dto.BackpackProblemRequest
+import ru.command.mephi12.dto.BackpackProblemType
+import ru.command.mephi12.service.problems.backpack.BackpackDegreesProblemSolverServiceImpl
+import ru.command.mephi12.service.problems.backpack.BackpackProblemHandler
+import ru.command.mephi12.service.problems.backpack.BackpackSuperIncreasingProblemSolverServiceImpl
+import java.math.BigInteger
 
 @SpringBootApplication
 class Mephi12Application
 
 fun main(args: Array<String>) {
 
-    val respose = SuperIncreasingProblemSolverServiceImpl().solve(ProblemRequest(
-        type = ProblemType.SUPER_INCREASING,
+    val response = BackpackProblemHandler(
+        BackpackSuperIncreasingProblemSolverServiceImpl(),
+        BackpackDegreesProblemSolverServiceImpl(),
+    ).solve(BackpackProblemRequest(
+        type = BackpackProblemType.CODE_SUPER_INCREASING,
 //        message = arrayListOf(true, false, true, true, false, false)
     ))
 
-    println(respose.let { jacksonObjectMapper().writeValueAsString(respose) })
+    println(response.let { jacksonObjectMapper().writeValueAsString(response) })
 
     runApplication<Mephi12Application>(*args)
 }
