@@ -4,6 +4,7 @@ package ru.command.mephi12.service.problems.backpack
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import ru.command.mephi12.dto.*
+import ru.command.mephi12.exception.AppException
 import java.math.BigInteger
 import kotlin.math.abs
 

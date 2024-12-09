@@ -14,28 +14,20 @@ class BackpackDegreesProblemSolverServiceImpl : AbstractBackpackProblemSolverSer
      * zeroCount = длина числа (p^n - 1)/(p-1), где n = size
      */
     override fun fixLightBackpack(input: List<BigInteger>, size: Int, p: Int): List<String> {
-        // Считаем сумму геом. прогрессии: S = (p^n - 1)/(p-1)
-        // Если p=1, это другой случай, но p>1 по условию
-        val S = geometricSum(p, size)
-        val zeroCount = S.toString().length
-
         val result = mutableListOf<String>()
         var sumSoFar = BigInteger.ZERO
 
         // Для каждой степени p^i формируем число
         for (i in 0 until size) {
             var found = false
-            val pPow = powLong(BigInteger(p.toString()), i)
+            val pPow = powLong(BigInteger(p.toString()), i).toString()
 
             while (!found) {
                 // Формируем кандидат:
-                // candidateStr = "0".repeat(zeroCount) + p^i
-                // randomPart и p^i соединяем как строки
-                val candidateStr = "0".repeat(zeroCount) + pPow.toString()
-                val candidate = BigInteger(candidateStr)
+                val candidate = BigInteger(pPow)
 
                 if (candidate > sumSoFar) {
-                    result.add(candidateStr)
+                    result.add(candidate.toString())
                     sumSoFar += candidate
                     found = true
                 }
@@ -43,14 +35,5 @@ class BackpackDegreesProblemSolverServiceImpl : AbstractBackpackProblemSolverSer
         }
 
         return result
-    }
-
-    /**
-     * Геометрическая сумма: (p^n - 1)/(p - 1)
-     */
-    private fun geometricSum(p: Int, n: Int): BigInteger {
-        // Быстро считаем p^n
-        val pPowN = powLong(BigInteger(p.toString()), n)
-        return (pPowN - BigInteger.ONE) / BigInteger((p - 1).toString())
     }
 }

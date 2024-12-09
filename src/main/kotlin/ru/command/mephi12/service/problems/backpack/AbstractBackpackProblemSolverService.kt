@@ -1,9 +1,11 @@
 package ru.command.mephi12.service.problems.backpack
 
-import ru.command.mephi12.dto.AppException
+import ru.command.mephi12.exception.AppException
 import ru.command.mephi12.dto.BackpackProblemRequest
 import ru.command.mephi12.dto.BackpackProblemDto
+import ru.command.mephi12.dto.BackpackProblemType
 import ru.command.mephi12.service.BackpackProblemSolverService
+import ru.command.mephi12.utils.fillUpWithZero
 import ru.command.mephi12.utils.sum
 import java.math.BigInteger
 import java.security.SecureRandom
@@ -31,8 +33,12 @@ abstract class AbstractBackpackProblemSolverService: BackpackProblemSolverServic
 
         // 3. Обрабатываем лёгкий рюкзак, делаем его длиной m
         val toAddAtStart = random.nextInt(0, 4)
+        val toBeAddedAtStart = List(message.size) { generateRandomNumber(toAddAtStart) }
         val toAddAtEnd = random.nextInt(0, 4)
-        val lightBackpack = fixLightBackpack(request.lightBackpack, message.size, p).map { BigInteger("${generateRandomNumber(toAddAtStart)}${it}00${generateRandomNumber(toAddAtEnd)}") }
+        val toBeAddedAtEnd = List(message.size) { generateRandomNumber(toAddAtEnd)}.fillUpWithZero()
+        val lightBackpack = fixLightBackpack(request.lightBackpack, message.size, p)
+            .fillUpWithZero()
+            .mapIndexed { index, value -> BigInteger("${toBeAddedAtStart[index]}$value${toBeAddedAtEnd[index]}") }
 
         // 4. Вычисляем модуль
         val module = lightBackpack.sum() + BigInteger.ONE
@@ -57,7 +63,7 @@ abstract class AbstractBackpackProblemSolverService: BackpackProblemSolverServic
 
         // Формируем ответ
         return BackpackProblemDto(
-            power = p,
+            power = if(request.type == BackpackProblemType.CODE_DEGREES) p else null,
             type = request.type,
             message = message,
             lightBackpack = lightBackpack,
