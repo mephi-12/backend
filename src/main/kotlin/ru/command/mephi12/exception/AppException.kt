@@ -1,4 +1,4 @@
-package ru.command.mephi12.dto
+package ru.command.mephi12.exception
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
