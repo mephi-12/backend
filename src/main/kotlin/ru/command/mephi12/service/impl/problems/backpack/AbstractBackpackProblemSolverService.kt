@@ -1,8 +1,8 @@
-package ru.command.mephi12.service.problems.backpack
+package ru.command.mephi12.service.impl.problems.backpack
 
 import ru.command.mephi12.exception.AppException
-import ru.command.mephi12.dto.BackpackProblemRequest
-import ru.command.mephi12.dto.BackpackProblemDto
+import ru.command.mephi12.dto.BackpackProblemEditorialRequest
+import ru.command.mephi12.dto.BackpackProblemEditorialResponse
 import ru.command.mephi12.dto.BackpackProblemType
 import ru.command.mephi12.service.BackpackProblemSolverService
 import ru.command.mephi12.utils.fillUpWithZero
@@ -22,7 +22,7 @@ abstract class AbstractBackpackProblemSolverService: BackpackProblemSolverServic
         31, 37, 41, 43, 47, 53, 59, 61, 67, 71
     )
 
-    override fun solve(request: BackpackProblemRequest): BackpackProblemDto {
+    override fun solve(request: BackpackProblemEditorialRequest): BackpackProblemEditorialResponse {
         // 1. Определяем p (power)
         val p = request.power?.takeIf { it > 1 } ?: first20Primes[random.nextInt(first20Primes.size)]
 
@@ -62,7 +62,7 @@ abstract class AbstractBackpackProblemSolverService: BackpackProblemSolverServic
         val encodedSum = encodeMessage(message, hardBackpack)
 
         // Формируем ответ
-        return BackpackProblemDto(
+        return BackpackProblemEditorialResponse(
             power = if(request.type == BackpackProblemType.CODE_DEGREES) p else null,
             type = request.type,
             message = message,

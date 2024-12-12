@@ -1,4 +1,4 @@
-package ru.command.mephi12.service.problems.backpack
+package ru.command.mephi12.service.impl.problems.backpack
 
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
