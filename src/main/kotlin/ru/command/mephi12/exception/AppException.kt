@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
     "ourStackTrace",
     "suppressed"
 )
-class AppException(
+open class AppException(
     var status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
     override val message: String = status.name,
     val errorDescription: ErrorDescription = ErrorDescription("", ""),
