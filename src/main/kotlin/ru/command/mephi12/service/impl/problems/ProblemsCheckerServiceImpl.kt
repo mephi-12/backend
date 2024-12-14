@@ -13,7 +13,7 @@ class ProblemsCheckerServiceImpl : ProblemsCheckerService {
     override fun check(request: BackpackProblemEditorialRequest, response: BackpackProblemSubmitRequest) {
         when (request.type) {
             BackpackProblemType.CODE_SUPER_INCREASING -> checkSuperIncreasing(request, response)
-            BackpackProblemType.CODE_DEGREES -> throw TaskSolverProblemException("Тип задачи ${request.type.text} не поддерживается для проверки.")
+            BackpackProblemType.CODE_DEGREES -> checkCodeDegrees(request, response)
         }
     }
 
