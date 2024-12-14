@@ -1,11 +1,9 @@
 package ru.command.mephi12.service
 
-import ru.command.mephi12.dto.BackpackProblemEditorialRequest
-import ru.command.mephi12.dto.BackpackProblemSubmitRequest
-import ru.command.mephi12.dto.EditorialProblemSolutionRequest
-import ru.command.mephi12.dto.EditorialTaskCheckRequest
+import ru.command.mephi12.dto.*
+import java.util.*
 
 interface ProblemsCheckerService {
-    fun check(request: BackpackProblemEditorialRequest, response: EditorialProblemSolutionRequest)
-    fun check(request: EditorialTaskCheckRequest)
+    fun check(id: UUID, request: BackpackProblemSubmitRequest) : BackpackProblemResponse
+    fun generateTask() : BackpackProblemResponse
 }

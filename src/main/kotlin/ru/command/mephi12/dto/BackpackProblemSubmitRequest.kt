@@ -5,7 +5,7 @@ import java.math.BigInteger
 
 data class BackpackProblemSubmitRequest(
     var power: Int,
-    var type: BackpackProblemType,
+    var type: String,
     var message: List<Boolean>,
     var lightBackpack: List<BigInteger>,
     var omega: BigInteger,
@@ -14,5 +14,4 @@ data class BackpackProblemSubmitRequest(
     var decodedMessage: List<Boolean>,
     var module: BigInteger,
     var reverseOmega: BigInteger,
-    val state: ProblemState,
 )
