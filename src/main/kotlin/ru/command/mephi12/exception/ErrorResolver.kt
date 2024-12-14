@@ -12,7 +12,7 @@ import java.lang.Exception
 
 @RestControllerAdvice
 class ErrorResolver {
-//    @ExceptionHandler(Exception::class)
+    @ExceptionHandler(Exception::class)
     fun handleException(exception: Exception, request: HttpServletRequest, response: HttpServletResponse) {
         val exceptionToResponse = toApiError(exception)
         val objectMapper = ObjectMapper().findAndRegisterModules()
