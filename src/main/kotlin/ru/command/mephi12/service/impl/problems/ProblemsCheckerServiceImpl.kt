@@ -1,23 +1,24 @@
 package ru.command.mephi12.service.impl.problems
 
 import org.springframework.stereotype.Component
-import ru.command.mephi12.dto.BackpackProblemEditorialRequest
-import ru.command.mephi12.dto.BackpackProblemSubmitRequest
-import ru.command.mephi12.dto.BackpackProblemType
+import ru.command.mephi12.dto.*
 import ru.command.mephi12.exception.TaskSolverProblemException
 import ru.command.mephi12.service.ProblemsCheckerService
 import java.math.BigInteger
 
 @Component
 class ProblemsCheckerServiceImpl : ProblemsCheckerService {
-    override fun check(request: BackpackProblemEditorialRequest, response: BackpackProblemSubmitRequest) {
+    override fun check(request: EditorialTaskCheckRequest) {
+        return check(request.task, request.solve)
+    }
+    override fun check(request: BackpackProblemEditorialRequest, response: EditorialProblemSolutionRequest) {
         when (request.type) {
             BackpackProblemType.CODE_SUPER_INCREASING -> checkSuperIncreasing(request, response)
             BackpackProblemType.CODE_DEGREES -> checkCodeDegrees(request, response)
         }
     }
 
-    private fun checkCodeDegrees(request: BackpackProblemEditorialRequest, response: BackpackProblemSubmitRequest) {
+    private fun checkCodeDegrees(request: BackpackProblemEditorialRequest, response: EditorialProblemSolutionRequest) {
         // 1. Проверка типа задачи
         if (request.type != response.type) {
             throw TaskSolverProblemException(
@@ -173,7 +174,7 @@ class ProblemsCheckerServiceImpl : ProblemsCheckerService {
         return result
     }
 
-    private fun checkSuperIncreasing(request: BackpackProblemEditorialRequest, response: BackpackProblemSubmitRequest) {
+    private fun checkSuperIncreasing(request: BackpackProblemEditorialRequest, response: EditorialProblemSolutionRequest) {
         // 1. Проверка типа задачи
         if (request.type != response.type) {
             throw TaskSolverProblemException("Тип задачи в запросе (${request.type.text}) не совпадает с типом в ответе (${response.type.text}).")
