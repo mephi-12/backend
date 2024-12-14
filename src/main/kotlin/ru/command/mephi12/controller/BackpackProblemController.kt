@@ -1,26 +1,41 @@
 package ru.command.mephi12.controller
 
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import org.slf4j.LoggerFactory
+import org.springframework.web.bind.annotation.*
 import ru.command.mephi12.dto.BackpackProblemEditorialRequest
+import ru.command.mephi12.dto.BackpackProblemSubmitRequest
 import ru.command.mephi12.dto.BackpackProblemType
 import ru.command.mephi12.dto.EditorialTaskCheckRequest
 import ru.command.mephi12.service.BackpackProblemSolverService
 import ru.command.mephi12.service.ProblemsCheckerService
+import java.util.*
 
+// TODO replace logging with log interceptor
 @RestController
 @RequestMapping("/tasks/backpack")
 class BackpackProblemController(
     val service: BackpackProblemSolverService,
     val problemsCheckerService: ProblemsCheckerService
 ) {
+    companion object {
+        val log = LoggerFactory.getLogger(BackpackProblemController::class.java)
+        val objectMapper = ObjectMapper().registerModules(JavaTimeModule())
+    }
     @GetMapping("/editorial")
     fun editorial(@RequestParam("type") type: BackpackProblemType) = service.solve(BackpackProblemEditorialRequest(type = type))
+        .also {
+            log.info("GET /tasks/backpack/editorial. Response: {}", objectMapper.writeValueAsString(it))
+        }
 
-    @PostMapping("/editorial/task/check")
-    fun checkEditorialTask(@RequestBody request: EditorialTaskCheckRequest) = problemsCheckerService.check(request)
+    @GetMapping
+    fun getTask() = problemsCheckerService.generateTask().also {
+        log.info("GET /tasks/backpack. Response: {}", objectMapper.writeValueAsString(it))
+    }
+    @PutMapping
+    fun submitTask(@RequestParam("id") id: UUID, @RequestBody request: BackpackProblemSubmitRequest) = problemsCheckerService.check(id, request).also {
+        log.info("PUT /tasks/backpack. Response: {}", objectMapper.writeValueAsString(it))
+
+    }
 }

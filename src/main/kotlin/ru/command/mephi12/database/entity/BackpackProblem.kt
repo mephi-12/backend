@@ -19,26 +19,26 @@ class BackpackProblem(
     @Column(nullable = false)
     @Convert(converter = BooleanListConverter::class)
     var message: List<Boolean>,
-    @Column(name = "light_backpack")
+    @Column(name = "light_backpack", nullable = false)
     @Convert(converter = BigIntegerListConverter::class)
     var lightBackpack: List<BigInteger>,
     @Column
-    var omega: BigInteger,
+    var omega: BigInteger?,
     @Column(name = "hard_backpack")
     @Convert(converter = BigIntegerListConverter::class)
-    var hardBackpack: List<BigInteger>,
+    var hardBackpack: List<BigInteger>?,
     @Column(name = "encoded_message")
-    var encodedMessage: BigInteger,
+    var encodedMessage: BigInteger?,
     @Column(name = "decoded_message")
     @Convert(converter = BooleanListConverter::class)
-    var decodedMessage: List<Boolean>,
+    var decodedMessage: List<Boolean>?,
     @Column
-    var module: BigInteger,
+    var module: BigInteger?,
     @Column(name = "reverse_omega")
-    var reverseOmega: BigInteger,
+    var reverseOmega: BigInteger?,
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     var state: ProblemState = ProblemState.NEW,
     @Column
-    var errorDescription : String,
+    var errorDescription : String?,
 ): AbstractEntity()

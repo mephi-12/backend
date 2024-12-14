@@ -5,12 +5,13 @@ import ru.command.mephi12.dto.BackpackProblemEditorialRequest
 import ru.command.mephi12.dto.BackpackProblemEditorialResponse
 import ru.command.mephi12.dto.BackpackProblemType
 import ru.command.mephi12.service.BackpackProblemSolverService
-import ru.command.mephi12.utils.fillUpWithZero
+import ru.command.mephi12.utils.generateCoprime
+import ru.command.mephi12.utils.generateRandomMessage
+import ru.command.mephi12.utils.generateRandomPartOfLightBackpack
 import ru.command.mephi12.utils.sum
 import java.math.BigInteger
 import java.security.SecureRandom
 import java.util.Random
-import kotlin.math.ceil
 
 abstract class AbstractBackpackProblemSolverService: BackpackProblemSolverService {
 
@@ -32,14 +33,7 @@ abstract class AbstractBackpackProblemSolverService: BackpackProblemSolverServic
         }
 
         // 3. Обрабатываем лёгкий рюкзак, делаем его длиной m
-        val toAddAtStart = random.nextInt(0, 4)
-        val toBeAddedAtStart = List(message.size) { generateRandomNumber(toAddAtStart) }
-        val toAddAtEnd = random.nextInt(0, 4)
-        val toBeAddedAtEnd = List(message.size) { generateRandomNumber(toAddAtEnd)}.fillUpWithZero()
-        val lightBackpack = fixLightBackpack(request.lightBackpack, message.size, p)
-            .fillUpWithZero()
-            .mapIndexed { index, value -> BigInteger("${toBeAddedAtStart[index]}$value${toBeAddedAtEnd[index]}") }
-
+        val lightBackpack = generateRandomPartOfLightBackpack(fixLightBackpack(request.lightBackpack, message.size, p))
         // 4. Вычисляем модуль
         val module = lightBackpack.sum() + BigInteger.ONE
 
@@ -84,33 +78,6 @@ abstract class AbstractBackpackProblemSolverService: BackpackProblemSolverServic
         }
         return result
     }
-
-    private fun generateRandomNumber(size: Int) : String =
-        (0 until size)
-            .map { ('0' until '9').random() }
-            .joinToString(separator = "")
-
-    private fun generateRandomMessage(): List<Boolean> {
-        val length = random.nextInt(9) + 8 // от 8 до 16
-        val result = MutableList(length) { random.nextBoolean() }
-
-        // Проверяем долю нулей - минимум 1/3
-        val zerosCount = result.count { !it }
-        val requiredZeros = ceil(length / 3.0).toInt()
-        if (zerosCount < requiredZeros) {
-            val needed = requiredZeros - zerosCount
-            var replaced = 0
-            for (i in result.indices) {
-                if (replaced >= needed) break
-                if (result[i]) {
-                    result[i] = false
-                    replaced++
-                }
-            }
-        }
-        return result
-    }
-
     private fun gcd(a: BigInteger, b: BigInteger): BigInteger {
         var x = a
         var y = b
@@ -120,33 +87,6 @@ abstract class AbstractBackpackProblemSolverService: BackpackProblemSolverServic
             x = temp
         }
         return x
-    }
-
-    private fun generateCoprime(m: BigInteger): BigInteger {
-        require(m > BigInteger.ONE) { "m должно быть больше 1" }
-
-        val rnd = SecureRandom()
-        var candidate: BigInteger
-        var attempts = 0
-        do {
-            attempts++
-            if(attempts > 10000) {
-                throw AppException("Не удалось найти взаимнопростое число за 10000 попыток")
-            }
-            // Генерируем случайное число с битовой длиной не меньше длины m
-            candidate = BigInteger(m.bitLength(), rnd)
-            // Если получилось число больше или равное m или меньше 2, корректируем его
-            if (candidate < BigInteger.TWO) {
-                candidate = candidate.mod(m).max(BigInteger.TWO)
-            } else if (candidate >= m) {
-                candidate = candidate.mod(m)
-                if (candidate < BigInteger.TWO) {
-                    candidate = candidate.add(BigInteger.TWO)
-                }
-            }
-        } while (candidate.gcd(m) != BigInteger.ONE)
-
-        return candidate
     }
 
     private fun modInverse(a: BigInteger, m: BigInteger): BigInteger? {

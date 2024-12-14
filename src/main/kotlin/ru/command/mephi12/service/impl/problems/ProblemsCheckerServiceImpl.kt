@@ -1,26 +1,126 @@
 package ru.command.mephi12.service.impl.problems
 
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
+import ru.command.mephi12.database.dao.BackpackProblemDao
+import ru.command.mephi12.database.entity.BackpackProblem
+import ru.command.mephi12.database.entity.ProblemState
 import ru.command.mephi12.dto.*
+import ru.command.mephi12.dto.mapper.BackpackProblemMapper
+import ru.command.mephi12.exception.AppException
 import ru.command.mephi12.exception.TaskSolverProblemException
 import ru.command.mephi12.service.ProblemsCheckerService
+import ru.command.mephi12.service.impl.problems.backpack.AbstractBackpackProblemSolverService
+import ru.command.mephi12.utils.*
 import java.math.BigInteger
+import java.util.*
+import kotlin.random.Random
 
 @Component
-class ProblemsCheckerServiceImpl : ProblemsCheckerService {
-    override fun check(request: EditorialTaskCheckRequest) {
-        return check(request.task, request.solve)
-    }
-    override fun check(request: BackpackProblemEditorialRequest, response: EditorialProblemSolutionRequest) {
-        when (request.type) {
-            BackpackProblemType.CODE_SUPER_INCREASING -> checkSuperIncreasing(request, response)
-            BackpackProblemType.CODE_DEGREES -> checkCodeDegrees(request, response)
+class ProblemsCheckerServiceImpl(
+    @Qualifier(BackpackProblemTypeQualifier.CODE_SUPER_INCREASING)
+    private val superIncreasingSolver: AbstractBackpackProblemSolverService,
+    @Qualifier(BackpackProblemTypeQualifier.CODE_DEGREES)
+    private val codeDegreesSolver: AbstractBackpackProblemSolverService,
+    private val mapper: BackpackProblemMapper,
+    private val dao: BackpackProblemDao,
+) : ProblemsCheckerService {
+    val rand: Random = Random
+
+    private val first3Primes = listOf(2, 3, 5)
+
+    @Transactional
+    override fun generateTask(): BackpackProblemResponse {
+
+        val rawType = getRandomInt(0, 1)
+        val type = when (rawType) {
+            0 -> BackpackProblemType.CODE_DEGREES
+            else -> BackpackProblemType.CODE_SUPER_INCREASING
         }
+
+        val pow: Int? = first3Primes.random().takeIf { type == BackpackProblemType.CODE_DEGREES }
+
+        val message = generateRandomMessage(3, 5)
+
+        val rawLightBackpack = generateRandomPartOfLightBackpack(
+            when (type) {
+                BackpackProblemType.CODE_DEGREES -> codeDegreesSolver
+                BackpackProblemType.CODE_SUPER_INCREASING -> superIncreasingSolver
+            }.fixLightBackpack(listOf(), message.size, pow ?: -1),
+            2,
+            2,
+        )
+
+        val toBeRemained = getRandomInt(0, 2)
+
+        val lightBackpack = MutableList<BigInteger?>(rawLightBackpack.size) { null }
+
+        repeat(toBeRemained) {
+            val pos = rand.nextInt(0, lightBackpack.size)
+            lightBackpack[pos] = rawLightBackpack[pos]
+        }
+
+        val resLightBackpack = lightBackpack.map { it ?: BigInteger.ZERO }
+
+        val shouldGenerateOmega = rand.nextBoolean()
+
+        val module = rawLightBackpack.sum() + BigInteger.ONE
+
+        val omega = generateCoprime(module).takeIf { shouldGenerateOmega }
+
+        val entity = mapper.requestToEntity(
+            BackpackProblemEditorialRequest(
+                pow,
+                type,
+                message,
+                resLightBackpack,
+                omega,
+            )
+        )
+
+        return mapper.entityToResponse(
+            dao.save(
+                entity
+            )
+        )
     }
 
-    private fun checkCodeDegrees(request: BackpackProblemEditorialRequest, response: EditorialProblemSolutionRequest) {
+    override fun check(id: UUID, request: BackpackProblemSubmitRequest): BackpackProblemResponse {
+        val task =
+            dao.findById(id).orElseThrow { throw AppException(HttpStatus.NOT_FOUND, "Задания с таким uuid не найдено") }
+        return mapper.entityToResponse(
+            dao.save(
+                try {
+                    when (request.type) {
+                        BackpackProblemType.CODE_SUPER_INCREASING.text -> checkSuperIncreasing(task, request)
+                        BackpackProblemType.CODE_DEGREES.text -> checkCodeDegrees(task, request)
+                    }
+
+                    mapper.modifyEntity(task, request).apply {
+                        state = ProblemState.SOLVED
+                    }
+
+                } catch (ex: TaskSolverProblemException) {
+                    mapper.modifyEntity(task, request).apply {
+                        state = ProblemState.FAILED
+                        errorDescription = ex.message
+                    }
+                }
+            )
+        )
+    }
+
+    private fun checkCodeDegrees(request: BackpackProblem, response: BackpackProblemSubmitRequest) {
+        // 0. task can be solved
+        if (request.state != ProblemState.NEW) {
+            throw TaskSolverProblemException(
+                "Задача уже решена!"
+            )
+        }
         // 1. Проверка типа задачи
-        if (request.type != response.type) {
+        if (request.type.text != response.type) {
             throw TaskSolverProblemException(
                 "Тип задачи в запросе (${request.type}) не совпадает с типом в ответе (${response.type})."
             )
@@ -174,10 +274,16 @@ class ProblemsCheckerServiceImpl : ProblemsCheckerService {
         return result
     }
 
-    private fun checkSuperIncreasing(request: BackpackProblemEditorialRequest, response: EditorialProblemSolutionRequest) {
+    private fun checkSuperIncreasing(request: BackpackProblem, response: BackpackProblemSubmitRequest) {
+        // 0. task can be solved
+        if (request.state != ProblemState.NEW) {
+            throw TaskSolverProblemException(
+                "Задача уже решена!"
+            )
+        }
         // 1. Проверка типа задачи
-        if (request.type != response.type) {
-            throw TaskSolverProblemException("Тип задачи в запросе (${request.type.text}) не совпадает с типом в ответе (${response.type.text}).")
+        if (request.type.text != response.type) {
+            throw TaskSolverProblemException("Тип задачи в запросе (${request.type.text}) не совпадает с типом в ответе (${response.type}).")
         }
 
         // 2. Проверка сообщения

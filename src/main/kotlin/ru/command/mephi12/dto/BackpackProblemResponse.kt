@@ -1,13 +1,13 @@
 package ru.command.mephi12.dto
 
-import ru.command.mephi12.database.entity.ProblemState
 import java.math.BigInteger
 import java.time.LocalDateTime
+import java.util.UUID
 
 data class BackpackProblemResponse(
-    val id: Long,
+    val id: UUID,
     val createdAt: LocalDateTime,
-    val state: ProblemState? = null,
+    val state: String? = null,
     var power: Int? = null,
     var type: String,
     var message: List<Boolean>,
