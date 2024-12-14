@@ -105,7 +105,7 @@ class ProblemsCheckerServiceImpl(
                 } catch (ex: TaskSolverProblemException) {
                     mapper.modifyEntity(task, request).apply {
                         state = ProblemState.FAILED
-                        errorDescription = ex.message
+                        errorDescription = errorDescription ?: ex.message
                     }
                 }
             )
