@@ -141,7 +141,6 @@ class ProblemsCheckerServiceImpl(
         }
 
         // 3. Проверка длины лёгкого и тяжёлого ранцев
-        // TODO: Рюкзак в задаче может быть задан частично. Сейчас прверка происходит исходя из того, что лёгкий рюкзак задан ПОЛНОСТЬЮ
         if (request.lightBackpack.size != response.lightBackpack.size) {
             throw TaskSolverProblemException(
                 "Длина лёгкого ранца в запросе (${request.lightBackpack.size}) не совпадает с длиной в ответе (${response.lightBackpack.size})."
@@ -297,7 +296,6 @@ class ProblemsCheckerServiceImpl(
         }
 
         // 3. Проверка длины легкого и тяжёлого ранцев и длины сообщения
-        // TODO: Рюкзак в задаче может быть задан частично. Сейчас прверка происходит исходя из того, что лёгкий рюкзак задан ПОЛНОСТЬЮ
         if (request.lightBackpack.size != response.lightBackpack.size) {
             throw TaskSolverProblemException("Длина легкого ранца в запросе (${request.lightBackpack.size}) не совпадает с длиной в ответе (${response.lightBackpack.size}).")
         }
