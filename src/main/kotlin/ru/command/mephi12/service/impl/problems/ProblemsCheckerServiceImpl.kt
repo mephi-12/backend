@@ -184,8 +184,8 @@ class ProblemsCheckerServiceImpl(
 
         // 5. Проверка модуля
         val expectedModule = response.lightBackpack.sumOf { it }
-        if (response.module > expectedModule) {
-            throw TaskSolverProblemException("Модуль в ответе (${response.module}) не меньше сумме элементов легкого ранца ($expectedModule).")
+        if (response.module <= expectedModule) {
+            throw TaskSolverProblemException("Модуль в ответе (${response.module}) не больше сумме элементов легкого ранца ($expectedModule).")
         }
 
         // 6. Проверка взаимной простоты омеги и модуля

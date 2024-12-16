@@ -1,6 +1,5 @@
 package ru.command.mephi12.dto
 
-import ru.command.mephi12.database.entity.ProblemState
 import java.math.BigInteger
 
 data class BackpackProblemSubmitRequest(

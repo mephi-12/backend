@@ -32,7 +32,7 @@ class BackpackProblemController(
     @PostMapping("/editorial")
     fun editorial(@RequestBody request: BackpackProblemEditorialRequest) = service.solve(request)
         .also {
-            log.info("GET /tasks/backpack/editorial. Response: {}", objectMapper.writeValueAsString(it))
+            log.info("POST /tasks/backpack/editorial. Response: {}", objectMapper.writeValueAsString(it))
         }
 
     @GetMapping

@@ -33,7 +33,7 @@ abstract class AbstractBackpackProblemSolverService: BackpackProblemSolverServic
         }
 
         // 3. Обрабатываем лёгкий рюкзак, делаем его длиной m
-        val lightBackpack = generateRandomPartOfLightBackpack(fixLightBackpack(request.lightBackpack, message.size, p))
+        val lightBackpack = request.lightBackpack.takeIf { it.isNotEmpty() } ?: generateRandomPartOfLightBackpack(fixLightBackpack(request.lightBackpack, message.size, p))
         // 4. Вычисляем модуль
         val module = lightBackpack.sum() + BigInteger.ONE
 
