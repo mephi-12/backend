@@ -1,5 +1,7 @@
 package ru.command.mephi12.service.impl.problems
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jsonMapper
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -93,6 +95,9 @@ class ProblemsCheckerServiceImpl(
         return mapper.entityToResponse(
             dao.save(
                 try {
+                    println("\n\nTask: ${jsonMapper().registerModules(JavaTimeModule()).writeValueAsString(task)}\n\n")
+                    println("\n\nSolution: ${jsonMapper().registerModules(JavaTimeModule()).writeValueAsString(request)}\n\n")
+
                     when (request.type) {
                         BackpackProblemType.CODE_SUPER_INCREASING.text -> checkSuperIncreasing(task, request)
                         BackpackProblemType.CODE_DEGREES.text -> checkCodeDegrees(task, request)
@@ -103,9 +108,10 @@ class ProblemsCheckerServiceImpl(
                     }
 
                 } catch (ex: TaskSolverProblemException) {
+                    println(ex.message)
                     mapper.modifyEntity(task, request).apply {
                         state = ProblemState.FAILED
-                        errorDescription = errorDescription ?: ex.message
+                        errorDescription = ex.message ?: errorDescription
                     }
                 }
             )
@@ -113,8 +119,9 @@ class ProblemsCheckerServiceImpl(
     }
 
     private fun checkCodeDegrees(request: BackpackProblem, response: BackpackProblemSubmitRequest) {
+        // TODO
         // 0. task can be solved
-        if (request.state != ProblemState.NEW) {
+        if (request.state == ProblemState.SOLVED) {
             throw TaskSolverProblemException(
                 "Задача уже решена!"
             )
@@ -273,42 +280,43 @@ class ProblemsCheckerServiceImpl(
         return result
     }
 
-    private fun checkSuperIncreasing(request: BackpackProblem, response: BackpackProblemSubmitRequest) {
+    private fun checkSuperIncreasing(task: BackpackProblem, solution: BackpackProblemSubmitRequest) {
+        // TODO
         // 0. task can be solved
-        if (request.state != ProblemState.NEW) {
+        if (task.state == ProblemState.SOLVED) {
             throw TaskSolverProblemException(
                 "Задача уже решена!"
             )
         }
         // 1. Проверка типа задачи
-        if (request.type.text != response.type) {
-            throw TaskSolverProblemException("Тип задачи в запросе (${request.type.text}) не совпадает с типом в ответе (${response.type}).")
+        if (task.type.text != solution.type) {
+            throw TaskSolverProblemException("Тип задачи в запросе (${task.type.text}) не совпадает с типом в ответе (${solution.type}).")
         }
 
         // 2. Проверка сообщения
-        if (request.message.size != response.message.size) {
-            throw TaskSolverProblemException("Длина сообщения в запросе (${request.message.size}) не совпадает с длиной в ответе (${response.message.size}).")
+        if (task.message.size != solution.message.size) {
+            throw TaskSolverProblemException("Длина сообщения в запросе (${task.message.size}) не совпадает с длиной в ответе (${solution.message.size}).")
         }
-        for (i in request.message.indices) {
-            if (request.message[i] != response.message[i]) {
-                throw TaskSolverProblemException("Бит сообщения на позиции $i не совпадает: запрос (${request.message[i]}) != ответ (${response.message[i]}).")
+        for (i in task.message.indices) {
+            if (task.message[i] != solution.message[i]) {
+                throw TaskSolverProblemException("Бит сообщения на позиции $i не совпадает: запрос (${task.message[i]}) != ответ (${solution.message[i]}).")
             }
         }
 
         // 3. Проверка длины легкого и тяжёлого ранцев и длины сообщения
-        if (request.lightBackpack.size != response.lightBackpack.size) {
-            throw TaskSolverProblemException("Длина легкого ранца в запросе (${request.lightBackpack.size}) не совпадает с длиной в ответе (${response.lightBackpack.size}).")
+        if (task.lightBackpack.size != solution.lightBackpack.size) {
+            throw TaskSolverProblemException("Длина легкого ранца в запросе (${task.lightBackpack.size}) не совпадает с длиной в ответе (${solution.lightBackpack.size}).")
         }
-        if (response.hardBackpack.size != response.lightBackpack.size) {
-            throw TaskSolverProblemException("Длина тяжёлого ранца (${response.hardBackpack.size}) не совпадает с длиной легкого ранца (${response.lightBackpack.size}).")
+        if (solution.hardBackpack.size != solution.lightBackpack.size) {
+            throw TaskSolverProblemException("Длина тяжёлого ранца (${solution.hardBackpack.size}) не совпадает с длиной легкого ранца (${solution.lightBackpack.size}).")
         }
-        if (request.message.size != response.lightBackpack.size) {
-            throw TaskSolverProblemException("Длина ранцев (${response.hardBackpack.size}) не совпадает с длиной сообщения (${response.lightBackpack.size}).")
+        if (task.message.size != solution.lightBackpack.size) {
+            throw TaskSolverProblemException("Длина ранцев (${solution.hardBackpack.size}) не совпадает с длиной сообщения (${solution.lightBackpack.size}).")
         }
 
         // 4. Проверка, что легкий ранец является строго сверхвозрастающей последовательностью
-        var sumSoFar = BigInteger.ZERO
-        for ((index, value) in response.lightBackpack.withIndex()) {
+        var sumSoFar = BigInteger.ONE.negate()
+        for ((index, value) in solution.lightBackpack.withIndex()) {
             if (value <= sumSoFar) {
                 throw TaskSolverProblemException("Элемент легкого ранца на позиции $index ($value) не превышает сумму всех предыдущих элементов ($sumSoFar). Рюкзак должен быть строго сверхвозрастающим.")
             }
@@ -316,71 +324,71 @@ class ProblemsCheckerServiceImpl(
         }
 
         // 5. Проверка модуля
-        val expectedModule = response.lightBackpack.sumOf { it }
-        if (response.module > expectedModule) {
-            throw TaskSolverProblemException("Модуль в ответе (${response.module}) не меньше сумме элементов легкого ранца ($expectedModule).")
+        val expectedModule = solution.lightBackpack.sumOf { it }
+        if (solution.module <= expectedModule) {
+            throw TaskSolverProblemException("Модуль в ответе (${solution.module}) не меньше сумме элементов легкого ранца ($expectedModule).")
         }
 
         // 6. Проверка взаимной простоты омеги и модуля
-        if (response.omega.gcd(response.module) != BigInteger.ONE) {
+        if (solution.omega.gcd(solution.module) != BigInteger.ONE) {
             throw TaskSolverProblemException(
-                "Омега (${response.omega}) не взаимно проста с модулем (${response.module}). НОД(omega, module) = ${
-                    response.omega.gcd(
-                        response.module
+                "Омега (${solution.omega}) не взаимно проста с модулем (${solution.module}). НОД(omega, module) = ${
+                    solution.omega.gcd(
+                        solution.module
                     )
                 }."
             )
         }
 
         // 7. Проверка тяжёлого ранца
-        for (i in response.lightBackpack.indices) {
-            val expectedHard = (response.lightBackpack[i].multiply(response.omega)).mod(response.module)
-            if (response.hardBackpack[i] != expectedHard) {
-                throw TaskSolverProblemException("Элемент тяжёлого ранца на позиции $i (${response.hardBackpack[i]}) не совпадает с ожидаемым значением ($expectedHard).")
+        for (i in solution.lightBackpack.indices) {
+            val expectedHard = (solution.lightBackpack[i].multiply(solution.omega)).mod(solution.module)
+            if (solution.hardBackpack[i] != expectedHard) {
+                throw TaskSolverProblemException("Элемент тяжёлого ранца на позиции $i (${solution.hardBackpack[i]}) не совпадает с ожидаемым значением ($expectedHard).")
             }
         }
 
         // 8. Проверка обратного элемента омеги
-        val computedReverseOmega = response.omega.modInverse(response.module)
-        if (computedReverseOmega != response.reverseOmega) {
-            throw TaskSolverProblemException("Обратный элемент омеги в ответе (${response.reverseOmega}) не совпадает с вычисленным значением ($computedReverseOmega).")
+        val computedReverseOmega = solution.omega.modInverse(solution.module)
+        if (computedReverseOmega != solution.reverseOmega) {
+            throw TaskSolverProblemException("Обратный элемент омеги в ответе (${solution.reverseOmega}) не совпадает с вычисленным значением ($computedReverseOmega).")
         }
         // Дополнительная проверка: omega * reverseOmega mod module = 1
-        if (response.omega.multiply(response.reverseOmega).mod(response.module) != BigInteger.ONE) {
-            throw TaskSolverProblemException("Омега (${response.omega}) умноженная на обратный элемент (${response.reverseOmega}) по модулю (${response.module}) не равна 1.")
+        if (solution.omega.multiply(solution.reverseOmega).mod(solution.module) != BigInteger.ONE) {
+            throw TaskSolverProblemException("Омега (${solution.omega}) умноженная на обратный элемент (${solution.reverseOmega}) по модулю (${solution.module}) не равна 1.")
         }
 
         // 9. Проверка шифртекста
-        val expectedEncodedMessage = response.message.zip(response.hardBackpack)
+        val expectedEncodedMessage = solution.message.zip(solution.hardBackpack)
             .fold(BigInteger.ZERO) { acc, pair ->
                 acc + if (pair.first) pair.second else BigInteger.ZERO
-            }
-        if (response.encodedMessage != expectedEncodedMessage) {
-            throw TaskSolverProblemException("Шифртекст в ответе (${response.encodedMessage}) не совпадает с ожидаемым значением ($expectedEncodedMessage).")
+            }.mod(solution.module)
+        if (solution.encodedMessage != expectedEncodedMessage) {
+            throw TaskSolverProblemException("Шифртекст в ответе (${solution.encodedMessage}) не совпадает с ожидаемым значением ($expectedEncodedMessage).")
         }
 
         // 10. Проверка расшифрованного сообщения
         // Вычисляем X = C * reverseOmega mod module
-        val computedX = response.encodedMessage.multiply(response.reverseOmega).mod(response.module)
+        val computedX = solution.encodedMessage.multiply(solution.reverseOmega).mod(solution.module)
 
         // Решаем задачу о рюкзаке с легким ранцем и X, используя жадный алгоритм
-        val decodedMessageComputed = solveSuperIncreasingBackpack(response.lightBackpack, computedX)
+        val decodedMessageComputed = solveSuperIncreasingBackpack(solution.lightBackpack, computedX)
 
         // Сравниваем расшифрованное сообщение с предоставленным
-        if (decodedMessageComputed != response.decodedMessage) {
-            throw TaskSolverProblemException("Расшифрованное сообщение (${response.decodedMessage}) не совпадает с вычисленным значением ($decodedMessageComputed).")
+        if (decodedMessageComputed != solution.decodedMessage) {
+            throw TaskSolverProblemException("Расшифрованное сообщение (${solution.decodedMessage}) не совпадает с вычисленным значением ($decodedMessageComputed).")
         }
 
         // 11. Дополнительные проверки
         // Проверка, что все элементы ранцев и модуль положительные
-        if (response.lightBackpack.any { it <= BigInteger.ZERO }) {
+        if (solution.lightBackpack.any { it <= BigInteger.ZERO }) {
             throw TaskSolverProblemException("Лёгкий ранец содержит неположительные элементы.")
         }
-        if (response.hardBackpack.any { it < BigInteger.ZERO }) {
+        if (solution.hardBackpack.any { it < BigInteger.ZERO }) {
             throw TaskSolverProblemException("Тяжёлый ранец содержит отрицательные элементы.")
         }
-        if (response.module <= BigInteger.ONE) {
-            throw TaskSolverProblemException("Модуль (${response.module}) должен быть больше 1.")
+        if (solution.module <= BigInteger.ONE) {
+            throw TaskSolverProblemException("Модуль (${solution.module}) должен быть больше 1.")
         }
     }
 
