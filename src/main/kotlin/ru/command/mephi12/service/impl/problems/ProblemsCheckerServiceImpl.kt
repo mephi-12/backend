@@ -105,6 +105,7 @@ class ProblemsCheckerServiceImpl(
 
                     mapper.modifyEntity(task, request).apply {
                         state = ProblemState.SOLVED
+                        errorDescription = null
                     }
 
                 } catch (ex: TaskSolverProblemException) {
