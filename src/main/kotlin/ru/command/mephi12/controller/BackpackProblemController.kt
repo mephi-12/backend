@@ -29,6 +29,12 @@ class BackpackProblemController(
             log.info("GET /tasks/backpack/editorial. Response: {}", objectMapper.writeValueAsString(it))
         }
 
+    @PostMapping("/editorial")
+    fun editorial(@RequestBody request: BackpackProblemEditorialRequest) = service.solve(request)
+        .also {
+            log.info("GET /tasks/backpack/editorial. Response: {}", objectMapper.writeValueAsString(it))
+        }
+
     @GetMapping
     fun getTask() = problemsCheckerService.generateTask().also {
         log.info("GET /tasks/backpack. Response: {}", objectMapper.writeValueAsString(it))
