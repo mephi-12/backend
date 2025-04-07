@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.lang.Exception
 
 @RestControllerAdvice
-class ErrorResolver {
+class ExceptionResolver {
     @ExceptionHandler(Exception::class)
     fun handleException(exception: Exception, request: HttpServletRequest, response: HttpServletResponse) {
         val exceptionToResponse = toApiError(exception)
