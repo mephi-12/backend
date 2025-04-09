@@ -2,6 +2,6 @@
 
 ## 🛠 Getting Started
 ```shell
-./gradlew bootRun
+docker-compose up
 ```
 Uses 8083 port by default
