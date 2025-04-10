@@ -3,9 +3,9 @@ package ru.command.mephi12.service.impl.problems.backpack
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
+import ru.command.mephi12.constants.ProblemType
 import ru.command.mephi12.dto.BackpackProblemEditorialRequest
 import ru.command.mephi12.dto.BackpackProblemEditorialResponse
-import ru.command.mephi12.dto.ProblemType
 import ru.command.mephi12.dto.BackpackProblemTypeQualifier
 import ru.command.mephi12.service.BackpackProblemSolverService
 
@@ -20,8 +20,9 @@ class BackpackProblemHandler(
 ) : BackpackProblemSolverService {
     override fun solve(request: BackpackProblemEditorialRequest): BackpackProblemEditorialResponse {
         return when (request.type) {
-            ProblemType.CODE_SUPER_INCREASING -> superIncreasingSolver.solve(request)
-            ProblemType.CODE_DEGREES -> codeDegreesSolver.solve(request)
+            ProblemType.BACKPACK_CODE_DEGREES -> superIncreasingSolver.solve(request)
+            ProblemType.BACKPACK_CODE_DEGREES -> codeDegreesSolver.solve(request)
+            else -> codeDegreesSolver.solve(request)
         }
     }
 }

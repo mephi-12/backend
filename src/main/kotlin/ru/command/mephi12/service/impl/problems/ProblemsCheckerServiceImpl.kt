@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional
 import ru.command.mephi12.database.dao.BackpackProblemDao
 import ru.command.mephi12.database.entity.BackpackProblem
 import ru.command.mephi12.constants.ProblemState
+import ru.command.mephi12.constants.ProblemType
 import ru.command.mephi12.dto.*
 import ru.command.mephi12.dto.mapper.BackpackProblemMapper
 import ru.command.mephi12.exception.AppException
@@ -28,28 +29,29 @@ class ProblemsCheckerServiceImpl(
     private val codeDegreesSolver: AbstractBackpackProblemSolverService,
     private val mapper: BackpackProblemMapper,
     private val dao: BackpackProblemDao,
-) : ProblemsCheckerService {
+) : ProblemsCheckerService<BackpackProblemResponse, BackpackProblemSubmitRequest> {
     val rand: Random = Random
 
     private val first3Primes = listOf(2, 3, 5)
 
     @Transactional
-    override fun generateTask(): BackpackProblemResponse {
+    override fun generateProblem(): BackpackProblemResponse {
 
         val rawType = getRandomInt(0, 1)
         val type = when (rawType) {
-            0 -> ProblemType.CODE_DEGREES
-            else -> ProblemType.CODE_SUPER_INCREASING
+            0 -> ProblemType.BACKPACK_CODE_DEGREES
+            else -> ProblemType.BACKPACK_CODE_SUPER_INCREASING
         }
 
-        val pow: Int? = first3Primes.random().takeIf { type == ProblemType.CODE_DEGREES }
+        val pow: Int? = first3Primes.random().takeIf { type == ProblemType.BACKPACK_CODE_DEGREES }
 
         val message = generateRandomMessage(3, 5)
 
         val rawLightBackpack = generateRandomPartOfLightBackpack(
             when (type) {
-                ProblemType.CODE_DEGREES -> codeDegreesSolver
-                ProblemType.CODE_SUPER_INCREASING -> superIncreasingSolver
+                ProblemType.BACKPACK_CODE_DEGREES -> codeDegreesSolver
+                ProblemType.BACKPACK_CODE_SUPER_INCREASING -> superIncreasingSolver
+                else -> codeDegreesSolver
             }.fixLightBackpack(listOf(), message.size, pow ?: -1),
             2,
             2,
@@ -99,8 +101,8 @@ class ProblemsCheckerServiceImpl(
                     println("\n\nSolution: ${jsonMapper().registerModules(JavaTimeModule()).writeValueAsString(request)}\n\n")
 
                     when (request.type) {
-                        ProblemType.CODE_SUPER_INCREASING.text -> checkSuperIncreasing(task, request)
-                        ProblemType.CODE_DEGREES.text -> checkCodeDegrees(task, request)
+                        ProblemType.BACKPACK_CODE_SUPER_INCREASING.description -> checkSuperIncreasing(task, request)
+                        ProblemType.BACKPACK_CODE_DEGREES.description -> checkCodeDegrees(task, request)
                     }
 
                     mapper.modifyEntity(task, request).apply {
@@ -128,7 +130,7 @@ class ProblemsCheckerServiceImpl(
             )
         }
         // 1. Проверка типа задачи
-        if (request.type.text != response.type) {
+        if (request.type.description != response.type) {
             throw TaskSolverProblemException(
                 "Тип задачи в запросе (${request.type}) не совпадает с типом в ответе (${response.type})."
             )
@@ -290,8 +292,8 @@ class ProblemsCheckerServiceImpl(
             )
         }
         // 1. Проверка типа задачи
-        if (task.type.text != solution.type) {
-            throw TaskSolverProblemException("Тип задачи в запросе (${task.type.text}) не совпадает с типом в ответе (${solution.type}).")
+        if (task.type.description != solution.type) {
+            throw TaskSolverProblemException("Тип задачи в запросе (${task.type.description}) не совпадает с типом в ответе (${solution.type}).")
         }
 
         // 2. Проверка сообщения

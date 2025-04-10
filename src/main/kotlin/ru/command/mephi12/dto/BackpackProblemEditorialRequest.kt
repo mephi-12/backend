@@ -1,5 +1,6 @@
 package ru.command.mephi12.dto
 
+import ru.command.mephi12.constants.ProblemType
 import java.math.BigInteger
 
 class BackpackProblemEditorialRequest(

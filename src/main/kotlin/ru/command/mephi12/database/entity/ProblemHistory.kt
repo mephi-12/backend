@@ -21,5 +21,5 @@ class ProblemHistory(
 ) : AbstractEntity() {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
-    private val user: User? = null
+    var user: User? = null
 }

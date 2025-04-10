@@ -14,7 +14,7 @@ class BackpackProblemMapper {
             createdAt = entity.createdAt,
             state = entity.state.value,
             power = entity.power,
-            type = entity.type.text,
+            type = entity.type.description,
             message = entity.message,
             lightBackpack = entity.lightBackpack,
             omega = entity.omega,

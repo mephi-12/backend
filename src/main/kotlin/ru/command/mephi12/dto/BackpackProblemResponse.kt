@@ -19,4 +19,4 @@ data class BackpackProblemResponse(
     var module: BigInteger? = null,
     var reverseOmega: BigInteger? = null,
     var errorDescription: String? = null,
-)
+) : AbstractProblemResponse(false) // todo
