@@ -1,7 +1,8 @@
 package ru.command.mephi12.database.entity
 
 import jakarta.persistence.*
-import ru.command.mephi12.dto.BackpackProblemType
+import ru.command.mephi12.constants.ProblemState
+import ru.command.mephi12.constants.ProblemType
 import ru.command.mephi12.utils.BigIntegerListConverter
 import ru.command.mephi12.utils.BooleanListConverter
 import java.math.BigInteger
@@ -15,7 +16,7 @@ class BackpackProblem(
     var power: Int?,
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    var type: BackpackProblemType,
+    var type: ProblemType,
     @Column(nullable = false)
     @Convert(converter = BooleanListConverter::class)
     var message: List<Boolean>,

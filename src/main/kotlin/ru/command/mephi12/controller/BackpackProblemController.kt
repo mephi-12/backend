@@ -6,8 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.*
 import ru.command.mephi12.dto.BackpackProblemEditorialRequest
 import ru.command.mephi12.dto.BackpackProblemSubmitRequest
-import ru.command.mephi12.dto.BackpackProblemType
-import ru.command.mephi12.dto.EditorialTaskCheckRequest
+import ru.command.mephi12.dto.ProblemType
 import ru.command.mephi12.service.BackpackProblemSolverService
 import ru.command.mephi12.service.ProblemsCheckerService
 import java.util.*
@@ -24,7 +23,7 @@ class BackpackProblemController(
         val objectMapper = ObjectMapper().registerModules(JavaTimeModule())
     }
     @GetMapping("/editorial")
-    fun editorial(@RequestParam("type") type: BackpackProblemType) = service.solve(BackpackProblemEditorialRequest(type = type))
+    fun editorial(@RequestParam("type") type: ProblemType) = service.solve(BackpackProblemEditorialRequest(type = type))
         .also {
             log.info("GET /tasks/backpack/editorial. Response: {}", objectMapper.writeValueAsString(it))
         }

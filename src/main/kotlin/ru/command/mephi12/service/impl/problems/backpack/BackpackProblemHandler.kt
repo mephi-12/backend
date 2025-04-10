@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 import ru.command.mephi12.dto.BackpackProblemEditorialRequest
 import ru.command.mephi12.dto.BackpackProblemEditorialResponse
-import ru.command.mephi12.dto.BackpackProblemType
+import ru.command.mephi12.dto.ProblemType
 import ru.command.mephi12.dto.BackpackProblemTypeQualifier
 import ru.command.mephi12.service.BackpackProblemSolverService
 
@@ -20,8 +20,8 @@ class BackpackProblemHandler(
 ) : BackpackProblemSolverService {
     override fun solve(request: BackpackProblemEditorialRequest): BackpackProblemEditorialResponse {
         return when (request.type) {
-            BackpackProblemType.CODE_SUPER_INCREASING -> superIncreasingSolver.solve(request)
-            BackpackProblemType.CODE_DEGREES -> codeDegreesSolver.solve(request)
+            ProblemType.CODE_SUPER_INCREASING -> superIncreasingSolver.solve(request)
+            ProblemType.CODE_DEGREES -> codeDegreesSolver.solve(request)
         }
     }
 }

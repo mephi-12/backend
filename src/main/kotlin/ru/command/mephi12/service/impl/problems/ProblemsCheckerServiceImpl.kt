@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import ru.command.mephi12.database.dao.BackpackProblemDao
 import ru.command.mephi12.database.entity.BackpackProblem
-import ru.command.mephi12.database.entity.ProblemState
+import ru.command.mephi12.constants.ProblemState
 import ru.command.mephi12.dto.*
 import ru.command.mephi12.dto.mapper.BackpackProblemMapper
 import ru.command.mephi12.exception.AppException
@@ -38,18 +38,18 @@ class ProblemsCheckerServiceImpl(
 
         val rawType = getRandomInt(0, 1)
         val type = when (rawType) {
-            0 -> BackpackProblemType.CODE_DEGREES
-            else -> BackpackProblemType.CODE_SUPER_INCREASING
+            0 -> ProblemType.CODE_DEGREES
+            else -> ProblemType.CODE_SUPER_INCREASING
         }
 
-        val pow: Int? = first3Primes.random().takeIf { type == BackpackProblemType.CODE_DEGREES }
+        val pow: Int? = first3Primes.random().takeIf { type == ProblemType.CODE_DEGREES }
 
         val message = generateRandomMessage(3, 5)
 
         val rawLightBackpack = generateRandomPartOfLightBackpack(
             when (type) {
-                BackpackProblemType.CODE_DEGREES -> codeDegreesSolver
-                BackpackProblemType.CODE_SUPER_INCREASING -> superIncreasingSolver
+                ProblemType.CODE_DEGREES -> codeDegreesSolver
+                ProblemType.CODE_SUPER_INCREASING -> superIncreasingSolver
             }.fixLightBackpack(listOf(), message.size, pow ?: -1),
             2,
             2,
@@ -99,8 +99,8 @@ class ProblemsCheckerServiceImpl(
                     println("\n\nSolution: ${jsonMapper().registerModules(JavaTimeModule()).writeValueAsString(request)}\n\n")
 
                     when (request.type) {
-                        BackpackProblemType.CODE_SUPER_INCREASING.text -> checkSuperIncreasing(task, request)
-                        BackpackProblemType.CODE_DEGREES.text -> checkCodeDegrees(task, request)
+                        ProblemType.CODE_SUPER_INCREASING.text -> checkSuperIncreasing(task, request)
+                        ProblemType.CODE_DEGREES.text -> checkCodeDegrees(task, request)
                     }
 
                     mapper.modifyEntity(task, request).apply {
