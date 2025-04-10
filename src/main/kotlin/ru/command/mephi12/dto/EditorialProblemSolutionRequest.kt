@@ -1,11 +1,11 @@
 package ru.command.mephi12.dto
 
-import ru.command.mephi12.database.entity.ProblemState
+import ru.command.mephi12.constants.ProblemType
 import java.math.BigInteger
 
 data class EditorialProblemSolutionRequest(
     var power: Int,
-    var type: BackpackProblemType,
+    var type: ProblemType,
     var message: List<Boolean>,
     var lightBackpack: List<BigInteger>,
     var omega: BigInteger,

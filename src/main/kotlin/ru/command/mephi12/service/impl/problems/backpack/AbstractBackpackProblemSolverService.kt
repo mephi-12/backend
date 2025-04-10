@@ -1,16 +1,15 @@
 package ru.command.mephi12.service.impl.problems.backpack
 
+import ru.command.mephi12.constants.ProblemType
 import ru.command.mephi12.exception.AppException
 import ru.command.mephi12.dto.BackpackProblemEditorialRequest
 import ru.command.mephi12.dto.BackpackProblemEditorialResponse
-import ru.command.mephi12.dto.BackpackProblemType
 import ru.command.mephi12.service.BackpackProblemSolverService
 import ru.command.mephi12.utils.generateCoprime
 import ru.command.mephi12.utils.generateRandomMessage
 import ru.command.mephi12.utils.generateRandomPartOfLightBackpack
 import ru.command.mephi12.utils.sum
 import java.math.BigInteger
-import java.security.SecureRandom
 import java.util.Random
 
 abstract class AbstractBackpackProblemSolverService: BackpackProblemSolverService {
@@ -57,7 +56,7 @@ abstract class AbstractBackpackProblemSolverService: BackpackProblemSolverServic
 
         // Формируем ответ
         return BackpackProblemEditorialResponse(
-            power = if(request.type == BackpackProblemType.CODE_DEGREES) p else null,
+            power = if(request.type == ProblemType.BACKPACK_CODE_DEGREES) p else null,
             type = request.type,
             message = message,
             lightBackpack = lightBackpack,

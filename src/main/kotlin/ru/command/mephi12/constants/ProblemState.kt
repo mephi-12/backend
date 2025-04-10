@@ -1,4 +1,4 @@
-package ru.command.mephi12.database.entity
+package ru.command.mephi12.constants
 
 enum class ProblemState(val value: String) {
     NEW("Задание решается"),
