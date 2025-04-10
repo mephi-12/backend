@@ -54,7 +54,7 @@ class JwtParser(
     fun parseTokenPrincipalFromHeader(tokenFromHeader: String): UserPrincipal {
         val token = tokenFromHeader.replace(headerPrefix, "")
         val claims = parseToken(token)
-        val userId = claims.body.get("userId", Integer::class.java)?.toLong() ?: throw AppException() // TODO
+        val userId = UUID.fromString(claims.body.get("userId", String::class.java) ?: throw AppException()) // TODO
         val rawAuthorities = claims.body.get("authorities", List::class.java)?.toList() ?: throw AppException() // TODO
         val authorities = mutableListOf<GrantedAuthority>()
         for (rawAuthority in rawAuthorities) {

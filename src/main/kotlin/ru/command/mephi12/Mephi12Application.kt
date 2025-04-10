@@ -15,7 +15,7 @@ fun main(args: Array<String>) {
 }
 
 private fun loadEnvParams() {
-    val dotenv = Dotenv.configure().directory("deployment").load()
+    val dotenv = Dotenv.load()
 
     dotenv.entries().forEach { envParam ->
         System.setProperty(envParam.key, envParam.value)
