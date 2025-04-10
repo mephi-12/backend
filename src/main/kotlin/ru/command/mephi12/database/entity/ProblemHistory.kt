@@ -1,11 +1,9 @@
 package ru.command.mephi12.database.entity
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.Table
+import jakarta.persistence.*
+import ru.command.mephi12.constants.ProblemState
 import ru.command.mephi12.constants.ProblemType
+
 
 @Entity
 @Table(
@@ -17,7 +15,11 @@ class ProblemHistory(
     var type: ProblemType,
     @Column(name = "statement", nullable = false)
     var statement: String,
-    @Column(name = "problem")
+    @Column(name = "state")
+    @Enumerated(EnumType.STRING)
+    var state: ProblemState = ProblemState.NEW
 ) : AbstractEntity() {
-
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
+    private val user: User? = null
 }
