@@ -28,7 +28,9 @@ class JwtFilter(
         val log = LoggerFactory.getLogger(JwtFilter::class.java)
     }
 
-    override fun shouldNotFilter(request: HttpServletRequest): Boolean = request.requestURI.also { log.info("Получен запрос {} {}", request.method, request.requestURI) }.containsAnyPath("/public", "/auth")
+    override fun shouldNotFilter(request: HttpServletRequest): Boolean =
+        request.requestURI.also { log.info("Получен запрос {} {}", request.method, request.requestURI) }
+            .containsAnyPath("/public", "/auth")
 
 
     override fun doFilterInternal(
