@@ -6,5 +6,18 @@ enum class ProblemType(val description: String) {
     BACKPACK_CODE_SUPER_INCREASING(BackpackProblemTypeQualifier.CODE_SUPER_INCREASING),
     BACKPACK_CODE_DEGREES(BackpackProblemTypeQualifier.CODE_DEGREES),
     BACKPACK_BACKDOOR("Задача о бэкдоре в Ранцевой КС"),
-    EL_GAMAL("Задача о КС Эль-Гамаля")
+    EL_GAMAL("Задача о КС Эль-Гамаля");
+
+    companion object {
+        fun getByQualifier(qualifier: String): ProblemType =
+            when (qualifier) {
+                EL_GAMAL_QUALIFIER -> EL_GAMAL
+                else -> throw IllegalArgumentException("Unknown problem qualifier")
+            }
+    }
+
+    fun getQualifier(): String = when(this) {
+        EL_GAMAL -> EL_GAMAL_QUALIFIER
+        else -> throw IllegalArgumentException("Unknown problem qualifier")
+    }
 }

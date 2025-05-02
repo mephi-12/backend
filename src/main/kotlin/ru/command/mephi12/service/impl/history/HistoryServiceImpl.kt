@@ -6,6 +6,7 @@ import ru.command.mephi12.dto.BackpackProblemResponse
 import ru.command.mephi12.dto.mapper.BackpackProblemMapper
 import ru.command.mephi12.service.HistoryService
 
+@Deprecated("Should be removed")
 @Service
 class HistoryServiceImpl(
     private val backpackProblemDao: BackpackProblemDao,

@@ -1,5 +1,6 @@
 package ru.command.mephi12.utils.mathLibrary
 
+import ru.command.mephi12.dto.AbstractProblemResponse
 import java.math.BigInteger
 
 /**

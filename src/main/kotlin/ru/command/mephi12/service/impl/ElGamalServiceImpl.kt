@@ -1,12 +1,20 @@
 package ru.command.mephi12.service.impl
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
+import ru.command.mephi12.constants.EL_GAMAL_QUALIFIER
+import ru.command.mephi12.dto.ProblemSubmitResponse
 import ru.command.mephi12.service.ElGamalService
+import ru.command.mephi12.service.ProblemsCheckerService
 import ru.command.mephi12.utils.mathLibrary.*
 import java.math.BigInteger
 
 @Service
-class ElGamalServiceImpl : ElGamalService {
+@Qualifier(EL_GAMAL_QUALIFIER)
+class ElGamalServiceImpl(
+    val objectMapper: ObjectMapper,
+) : ElGamalService, ProblemsCheckerService<ElGamalTask> {
     
     /**
      * Создает демонстрационный пример работы криптосистемы Эль-Гамаля
@@ -15,7 +23,7 @@ class ElGamalServiceImpl : ElGamalService {
     override fun generateDemo(bitLength: Int, message: BigInteger?): ElGamalDemo {
         return ElGamalUtils.createDemoExample(bitLength, message)
     }
-    
+
     /**
      * Создает задание для пользователя с заданной длиной ключа
      */
@@ -44,4 +52,16 @@ class ElGamalServiceImpl : ElGamalService {
     override fun decrypt(ciphertext: ElGamalUtils.Ciphertext, p: BigInteger, x: BigInteger): BigInteger {
         return ElGamalUtils.decrypt(ciphertext, p, x)
     }
+
+    override fun check(statement: String, solurionRequest: String): ProblemSubmitResponse {
+        val task = objectMapper.readValue(statement, ElGamalTask::class.java)
+        val solution = objectMapper.readValue(statement, ElGamalSolution::class.java)
+        val elGamalVerdict = checkSolution(task, solution)
+        return ProblemSubmitResponse(
+            isOk = elGamalVerdict.isCorrect,
+            errorMessage = elGamalVerdict.errorMessage,
+        )
+    }
+
+    override fun generateProblem(): ElGamalTask = generateTask(32) // ?
 }
