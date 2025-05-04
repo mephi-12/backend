@@ -9,6 +9,7 @@ import ru.command.mephi12.dto.modern_problem.ProblemDto
 @Table(name = "problem")
 class Problem(
     @Column(nullable = false)
+    @Lob
     val statement: String,
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -17,7 +18,7 @@ class Problem(
     @Enumerated(EnumType.STRING)
     var state: ProblemState = ProblemState.NEW,
 ) : AbstractEntity() {
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "problem_session")
     lateinit var problemSession: ProblemSession
 

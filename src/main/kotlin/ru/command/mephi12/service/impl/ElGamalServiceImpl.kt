@@ -1,7 +1,6 @@
 package ru.command.mephi12.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import ru.command.mephi12.constants.EL_GAMAL_QUALIFIER
 import ru.command.mephi12.dto.ProblemSubmitResponse
@@ -10,12 +9,11 @@ import ru.command.mephi12.service.ProblemsCheckerService
 import ru.command.mephi12.utils.mathLibrary.*
 import java.math.BigInteger
 
-@Service
-@Qualifier(EL_GAMAL_QUALIFIER)
+@Service(EL_GAMAL_QUALIFIER)
 class ElGamalServiceImpl(
     val objectMapper: ObjectMapper,
 ) : ElGamalService, ProblemsCheckerService<ElGamalTask> {
-    
+
     /**
      * Создает демонстрационный пример работы криптосистемы Эль-Гамаля
      * с подробными пояснениями для каждого шага
@@ -53,7 +51,7 @@ class ElGamalServiceImpl(
         return ElGamalUtils.decrypt(ciphertext, p, x)
     }
 
-    override fun check(statement: String, solurionRequest: String): ProblemSubmitResponse {
+    override fun check(statement: String, solutionRequest: String): ProblemSubmitResponse {
         val task = objectMapper.readValue(statement, ElGamalTask::class.java)
         val solution = objectMapper.readValue(statement, ElGamalSolution::class.java)
         val elGamalVerdict = checkSolution(task, solution)

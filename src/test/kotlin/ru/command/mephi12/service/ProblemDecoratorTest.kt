@@ -8,12 +8,12 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.transaction.annotation.Transactional
 import ru.command.mephi12.database.dao.ProblemSessionDao
 import ru.command.mephi12.database.dao.UserDao
 import ru.command.mephi12.database.entity.User
 import ru.command.mephi12.service.impl.problems.ProblemDecorator
 import ru.command.mephi12.utils.getPrincipal
-import java.util.*
 
 // не работает
 @SpringBootTest
@@ -30,17 +30,18 @@ class ProblemDecoratorTest {
 
     @BeforeEach
     fun setUp() {
-        val id = UUID.randomUUID()
         val user = User(
-            "as",
-            "ab"
+            "test@test.com",
+            "Тестик",
         ).apply {
             this.hash = "asfasd"
         }
 
-        userDao.save(user)
+        val id = userDao.save(user).id
 
-        println("ID: ${id}")
+        Thread.sleep(1000)
+
+        println("ID: $id")
 
         val auth: Authentication =
             UsernamePasswordAuthenticationToken(id, null, emptyList())
@@ -55,6 +56,7 @@ class ProblemDecoratorTest {
     }
 
     @Test
+    @Transactional
     fun testGeneration() {
         val session = decorator.createSolvingSession("Sem4")
         val problemSession = problemSessionDao.findById(session.id).orElseThrow { throw Exception() }

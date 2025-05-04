@@ -1,7 +1,6 @@
 package ru.command.mephi12.database.entity
 
 import jakarta.persistence.*
-import java.util.*
 
 @Entity
 @Table(name = "`User`")
@@ -16,6 +15,6 @@ class User(
     @Column(name = "hash", nullable = false)
     var hash: String? = null
 
-    @OneToMany(mappedBy = "user", orphanRemoval = true)
+    @OneToMany(mappedBy = "user", orphanRemoval = true, fetch = FetchType.EAGER)
     var problemSessions: MutableList<ProblemSession> = mutableListOf()
 }

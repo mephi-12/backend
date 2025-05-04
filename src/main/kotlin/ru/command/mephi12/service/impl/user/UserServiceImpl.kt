@@ -26,7 +26,7 @@ class UserServiceImpl(
         return dao.existsByEmail(email)
     }
 
-    override fun findEntityByEmail(email: String) : User {
+    override fun findEntityByEmail(email: String): User {
         return dao.findByEmail(email).orElseThrow { ResourceNotFoundException(email) }
     }
 
@@ -46,17 +46,18 @@ class UserServiceImpl(
 
     override fun getCurrentProblemSession(): ProblemSession? {
         val user = findEntityById(getPrincipal())
-        return user.problemSessions.firstOrNull { it.sessionState == ProblemState.NEW}
+        return user.problemSessions.firstOrNull { it.sessionState == ProblemState.NEW }
     }
 
     override fun createUser(request: RegistrationRequest): User {
         if (dao.existsByEmail(request.email)) {
             throw AppException(request.email) // TODO
         }
-        val user = mapper.asEntity(request).apply { // todo пароль в маппере
-            hash = passwordEncoder.encode(request.password)
-            dao.save(this)
-        }
+        val user = dao.save(
+            mapper.asEntity(request).apply { // todo пароль в маппере
+                hash = passwordEncoder.encode(request.password)
+            }
+        )
         return user
     }
 

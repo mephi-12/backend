@@ -18,7 +18,7 @@ class ProblemSession(
     @JoinColumn(name = "user_id")
     lateinit var user: User
 
-    @OneToMany(mappedBy = "problemSession")
+    @OneToMany(mappedBy = "problemSession", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     var problems: MutableList<Problem> = mutableListOf()
 
     fun toDto() : ProblemSessionDto =
