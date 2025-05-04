@@ -1,13 +1,11 @@
 package ru.command.mephi12.service.impl.problems
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jsonMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import ru.command.mephi12.constants.BACKPACK_QUALIFIER
 import ru.command.mephi12.database.dao.BackpackProblemDao
-import ru.command.mephi12.database.entity.BackpackProblem
 import ru.command.mephi12.constants.ProblemState
 import ru.command.mephi12.constants.ProblemType
 import ru.command.mephi12.dto.*
@@ -18,21 +16,32 @@ import ru.command.mephi12.service.ProblemsCheckerService
 import ru.command.mephi12.service.impl.problems.backpack.AbstractBackpackProblemSolverService
 import ru.command.mephi12.utils.*
 import java.math.BigInteger
-import java.util.*
 import kotlin.random.Random
 
-@Component
-class ProblemsCheckerServiceImpl(
+@Component(BACKPACK_QUALIFIER)
+class BackpackProblemsCheckerServiceImpl(
     @Qualifier(BackpackProblemTypeQualifier.CODE_SUPER_INCREASING)
     private val superIncreasingSolver: AbstractBackpackProblemSolverService,
     @Qualifier(BackpackProblemTypeQualifier.CODE_DEGREES)
     private val codeDegreesSolver: AbstractBackpackProblemSolverService,
     private val mapper: BackpackProblemMapper,
     private val dao: BackpackProblemDao,
-) : ProblemsCheckerService<BackpackProblemResponse, BackpackProblemSubmitRequest> {
+    private val objectMapper: ObjectMapper,
+) : ProblemsCheckerService<BackpackProblemResponse> {
     val rand: Random = Random
 
     private val first3Primes = listOf(2, 3, 5)
+
+    override fun check(statement: String, solutionRequest: String): ProblemSubmitResponse {
+        val rawTask = objectMapper.readValue(statement, BackpackProblemResponse::class.java)
+        val solution = objectMapper.readValue(solutionRequest, BackpackProblemSubmitRequest::class.java)
+        when(rawTask.type) {
+            BackpackProblemTypeQualifier.CODE_DEGREES -> checkCodeDegrees(rawTask, solution)
+            BackpackProblemTypeQualifier.CODE_SUPER_INCREASING -> checkSuperIncreasing(rawTask, solution)
+            else -> {/* */}
+        }
+        return ProblemSubmitResponse(isOk = true)
+    }
 
     @Transactional
     override fun generateProblem(): BackpackProblemResponse {
@@ -91,69 +100,40 @@ class ProblemsCheckerServiceImpl(
         )
     }
 
-    override fun check(id: UUID, request: BackpackProblemSubmitRequest): BackpackProblemResponse {
-        val task =
-            dao.findById(id).orElseThrow { throw AppException(HttpStatus.NOT_FOUND, "Задания с таким uuid не найдено") }
-        return mapper.entityToResponse(
-            dao.save(
-                try {
-                    println("\n\nTask: ${jsonMapper().registerModules(JavaTimeModule()).writeValueAsString(task)}\n\n")
-                    println("\n\nSolution: ${jsonMapper().registerModules(JavaTimeModule()).writeValueAsString(request)}\n\n")
-
-                    when (request.type) {
-                        ProblemType.BACKPACK_CODE_SUPER_INCREASING.description -> checkSuperIncreasing(task, request)
-                        ProblemType.BACKPACK_CODE_DEGREES.description -> checkCodeDegrees(task, request)
-                    }
-
-                    mapper.modifyEntity(task, request).apply {
-                        state = ProblemState.SOLVED
-                        errorDescription = null
-                    }
-
-                } catch (ex: TaskSolverProblemException) {
-                    println(ex.message)
-                    mapper.modifyEntity(task, request).apply {
-                        state = ProblemState.FAILED
-                        errorDescription = ex.message ?: errorDescription
-                    }
-                }
-            )
-        )
-    }
-
-    private fun checkCodeDegrees(request: BackpackProblem, response: BackpackProblemSubmitRequest) {
+    private fun checkCodeDegrees(rawTask: BackpackProblemResponse, response: BackpackProblemSubmitRequest) {
+        val task = dao.findById(rawTask.id).orElseThrow { AppException("Такой задачи не существует") }
         // TODO
         // 0. task can be solved
-        if (request.state == ProblemState.SOLVED) {
+        if (task.state == ProblemState.SOLVED) {
             throw TaskSolverProblemException(
                 "Задача уже решена!"
             )
         }
         // 1. Проверка типа задачи
-        if (request.type.description != response.type) {
+        if (task.type.description != response.type) {
             throw TaskSolverProblemException(
-                "Тип задачи в запросе (${request.type}) не совпадает с типом в ответе (${response.type})."
+                "Тип задачи в запросе (${task.type}) не совпадает с типом в ответе (${response.type})."
             )
         }
 
         // 2. Проверка сообщения
-        if (request.message.size != response.message.size) {
+        if (task.message.size != response.message.size) {
             throw TaskSolverProblemException(
-                "Длина сообщения в запросе (${request.message.size}) не совпадает с длиной в ответе (${response.message.size})."
+                "Длина сообщения в запросе (${task.message.size}) не совпадает с длиной в ответе (${response.message.size})."
             )
         }
-        for (i in request.message.indices) {
-            if (request.message[i] != response.message[i]) {
+        for (i in task.message.indices) {
+            if (task.message[i] != response.message[i]) {
                 throw TaskSolverProblemException(
-                    "Бит сообщения на позиции $i не совпадает: запрос (${request.message[i]}) != ответ (${response.message[i]})."
+                    "Бит сообщения на позиции $i не совпадает: запрос (${task.message[i]}) != ответ (${response.message[i]})."
                 )
             }
         }
 
         // 3. Проверка длины лёгкого и тяжёлого ранцев
-        if (request.lightBackpack.size != response.lightBackpack.size) {
+        if (task.lightBackpack.size != response.lightBackpack.size) {
             throw TaskSolverProblemException(
-                "Длина лёгкого ранца в запросе (${request.lightBackpack.size}) не совпадает с длиной в ответе (${response.lightBackpack.size})."
+                "Длина лёгкого ранца в запросе (${task.lightBackpack.size}) не совпадает с длиной в ответе (${response.lightBackpack.size})."
             )
         }
         if (response.hardBackpack.size != response.lightBackpack.size) {
@@ -171,9 +151,9 @@ class ProblemsCheckerServiceImpl(
         // Однако без знания точной структуры дополнений это сложно сделать
         // Поэтому ограничимся проверкой, что в лёгком ранце присутствуют числа, являющиеся степенями p
 
-        val p = request.power ?: throw TaskSolverProblemException("Поле power не задано в запросе.")
+        val p = task.power ?: throw TaskSolverProblemException("Поле power не задано в запросе.")
 
-        val expectedLightBackpack = fixLightBackpack(request.lightBackpack, response.message.size, p)
+        val expectedLightBackpack = fixLightBackpack(task.lightBackpack, response.message.size, p)
 
         // Сравниваем с предоставленным лёгким ранцем
         for (i in expectedLightBackpack.indices) {
@@ -283,7 +263,8 @@ class ProblemsCheckerServiceImpl(
         return result
     }
 
-    private fun checkSuperIncreasing(task: BackpackProblem, solution: BackpackProblemSubmitRequest) {
+    private fun checkSuperIncreasing(rawTask: BackpackProblemResponse, solution: BackpackProblemSubmitRequest) {
+        val task = dao.findById(rawTask.id).orElseThrow { AppException("Такой задачи не существует") }
         // TODO
         // 0. task can be solved
         if (task.state == ProblemState.SOLVED) {

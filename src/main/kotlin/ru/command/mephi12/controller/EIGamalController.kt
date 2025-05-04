@@ -1,21 +1,19 @@
 package ru.command.mephi12.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.*
 import ru.command.mephi12.service.ElGamalService
-import java.util.*
 
 // TODO replace logging with log interceptor
 @RestController
 @RequestMapping("/tasks/eigamal")
 class EIGamalController(
-    private val service: ElGamalService
+    private val service: ElGamalService,
+    private val objectMapper: ObjectMapper
 ) {
     companion object {
         val log = LoggerFactory.getLogger(EIGamalController::class.java)
-        val objectMapper = ObjectMapper().registerModules(JavaTimeModule())
     }
 
     @GetMapping("/editorial")

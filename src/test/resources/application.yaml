@@ -1,0 +1,24 @@
+spring:
+  security:
+    jwt:
+      secret: eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTY5NzY0NjIxMSwiaWF0IjoxNjk3NjQ2MjExfQ.aJJTADa3j3BR2xHjC4DcRfj50Cv4Gr5v4-sot39e2Sk
+      access.lifetime: 1
+
+  application:
+    name: task-tracker
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mephi12
+    username: mephi12
+    password: pass1234
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  servlet:
+    context-path: /api
+  port: 8083

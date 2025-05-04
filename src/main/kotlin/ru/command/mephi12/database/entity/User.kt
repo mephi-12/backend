@@ -1,7 +1,6 @@
 package ru.command.mephi12.database.entity
 
 import jakarta.persistence.*
-import org.springframework.scheduling.config.Task
 
 @Entity
 @Table(name = "`User`")
@@ -16,6 +15,6 @@ class User(
     @Column(name = "hash", nullable = false)
     var hash: String? = null
 
-    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var problems: MutableList<ProblemHistory> = mutableListOf()
+    @OneToMany(mappedBy = "user", orphanRemoval = true, fetch = FetchType.EAGER)
+    var problemSessions: MutableList<ProblemSession> = mutableListOf()
 }
