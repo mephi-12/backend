@@ -61,5 +61,5 @@ class ElGamalServiceImpl(
         )
     }
 
-    override fun generateProblem(): ElGamalTask = generateTask(32) // ?
+    override fun generateProblem(): ElGamalTask = generateTask(5)
 }

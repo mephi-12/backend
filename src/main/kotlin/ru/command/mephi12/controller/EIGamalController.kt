@@ -17,12 +17,12 @@ class EIGamalController(
     }
 
     @GetMapping("/editorial")
-    fun editorial() = service.generateDemo().also {
+    fun editorial(@RequestParam(defaultValue = "10") bitLength: Int) = service.generateDemo(bitLength).also {
         log.info("GET /tasks/eigamal/editorial. Response: {}", objectMapper.writeValueAsString(it))
     }
 
     @GetMapping
-    fun getTask() = service.generateTask().also {
+    fun getTask(@RequestParam(defaultValue = "10") bitLength: Int) = service.generateTask(bitLength).also {
         log.info("GET /tasks/eigamal. Response: {}", objectMapper.writeValueAsString(it))
     }
 

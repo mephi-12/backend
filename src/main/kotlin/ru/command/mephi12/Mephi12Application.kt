@@ -15,9 +15,15 @@ fun main(args: Array<String>) {
 }
 
 private fun loadEnvParams() {
-    val dotenv = Dotenv.load()
+    try {
+        val dotenv = Dotenv.configure()
+            .ignoreIfMissing()
+            .load()
 
-    dotenv.entries().forEach { envParam ->
-        System.setProperty(envParam.key, envParam.value)
+        dotenv.entries().forEach { envParam ->
+            System.setProperty(envParam.key, envParam.value)
+        }
+    } catch (e: Exception) {
+        println("Warning: Could not load .env file. Using system environment variables instead.")
     }
 }
