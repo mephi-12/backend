@@ -89,4 +89,6 @@ class ProblemDecorator(
 
         return result
     }
+
+    fun getSessions() = problemSessionDao.findAll().map { it.toDto() }
 }
