@@ -11,7 +11,7 @@ class Mephi12Application
 
 fun main(args: Array<String>) {
 //    Нужно для подгрузки переменных окружения если потребуется запустить не через контейнер
-//    loadEnvParams()
+    loadEnvParams()
 
     runApplication<Mephi12Application>(*args)
 }
