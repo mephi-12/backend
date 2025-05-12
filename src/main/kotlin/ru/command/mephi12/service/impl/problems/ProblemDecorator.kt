@@ -10,12 +10,16 @@ import ru.command.mephi12.constants.ProblemType
 import ru.command.mephi12.database.dao.ProblemDao
 import ru.command.mephi12.database.dao.ProblemSessionDao
 import ru.command.mephi12.database.entity.Problem
+import ru.command.mephi12.database.entity.ProblemConfiguration
 import ru.command.mephi12.database.entity.ProblemSession
+import ru.command.mephi12.dto.ProblemConfigurationDto
 import ru.command.mephi12.dto.ProblemSubmitResponse
 import ru.command.mephi12.dto.modern_problem.ProblemSessionDto
 import ru.command.mephi12.exception.AppException
+import ru.command.mephi12.exception.ResourceNotFoundException
 import ru.command.mephi12.service.ProblemsCheckerService
 import ru.command.mephi12.service.UserService
+import ru.command.mephi12.service.impl.GroupConfigService
 import ru.command.mephi12.utils.getPrincipal
 import java.util.*
 
@@ -25,17 +29,26 @@ class ProblemDecorator(
     private val problemSessionDao: ProblemSessionDao,
     private val problemDao: ProblemDao,
     private val objectMapper: ObjectMapper,
-    private val userService: UserService
+    private val userService: UserService,
+    private val groupConfigService: GroupConfigService,
 ) {
-    val configuration: Map<String, List<String>> = mapOf(
-        "Sem4" to listOf(BACKPACK_QUALIFIER, EL_GAMAL_QUALIFIER, EL_GAMAL_QUALIFIER),
-    )
+    private fun getAllowedSessionConfigs(): Map<String, List<String>> {
+        val groupId = userService.findEntityById(getPrincipal()).group?.id ?: throw ResourceNotFoundException("У вас нет группы!")
+        return groupConfigService.enabledConfigs(groupId).associate {
+            it.name to it.taskServices
+        }
+    }
+
+//    val configuration: Map<String, List<String>> = mapOf(
+//        "Sem4" to listOf(BACKPACK_QUALIFIER, EL_GAMAL_QUALIFIER, EL_GAMAL_QUALIFIER),
+//    )
 
     @Transactional
     fun createSolvingSession(sessionType: String): ProblemSessionDto {
         if (userService.getCurrentProblemSession() != null) {
             throw AppException("Вы уже решаете набор задач!")
         }
+        val configuration = getAllowedSessionConfigs()
         val problemConfig = configuration[sessionType] ?: throw AppException("Problem configuration not found")
         val problemSession = problemSessionDao.save(
             ProblemSession().apply {

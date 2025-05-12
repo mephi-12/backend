@@ -10,10 +10,13 @@ class User(
 
     @Column(name = "name", nullable = false)
     var name: String,
-
     ) : AbstractEntity() {
     @Column(name = "hash", nullable = false)
     var hash: String? = null
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "group_id")
+    var group: UserGroup? = null
 
     @OneToMany(mappedBy = "user", orphanRemoval = true, fetch = FetchType.EAGER)
     var problemSessions: MutableList<ProblemSession> = mutableListOf()

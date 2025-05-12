@@ -10,6 +10,7 @@ import ru.command.mephi12.dto.auth.RegistrationRequest
 import ru.command.mephi12.dto.mapper.UserMapper
 import ru.command.mephi12.exception.AppException
 import ru.command.mephi12.exception.ResourceNotFoundException
+import ru.command.mephi12.service.UserGroupService
 import ru.command.mephi12.service.UserService
 import ru.command.mephi12.utils.getPrincipal
 import java.util.*
@@ -20,6 +21,7 @@ class UserServiceImpl(
     private val passwordEncoder: PasswordEncoder,
     private val dao: UserDao,
     private val mapper: UserMapper,
+    private val userGroupService: UserGroupService
 ) : UserService {
 
     override fun existByEmail(email: String): Boolean {
@@ -47,6 +49,19 @@ class UserServiceImpl(
     override fun getCurrentProblemSession(): ProblemSession? {
         val user = findEntityById(getPrincipal())
         return user.problemSessions.firstOrNull { it.sessionState == ProblemState.NEW }
+    }
+
+    override fun setUserGroup(userId: UUID, group: String) {
+        val user = findEntityById(userId)
+        val userGroup = userGroupService.findByName(group)
+        user.group = userGroup
+        val updatedUser = dao.save(user)
+        userGroup.users.add(updatedUser)
+        userGroupService.save(userGroup)
+    }
+
+    override fun setMyGroup(group: String) {
+        setUserGroup(getPrincipal(), group)
     }
 
     override fun createUser(request: RegistrationRequest): User {

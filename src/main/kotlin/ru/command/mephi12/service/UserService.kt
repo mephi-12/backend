@@ -13,4 +13,6 @@ interface UserService {
     fun getSelfProfile(userId: UUID)
     fun getUserProfile(userId: UUID)
     fun getCurrentProblemSession(): ProblemSession?
+    fun setUserGroup(userId: UUID, group: String)
+    fun setMyGroup(group: String)
 }
