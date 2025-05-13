@@ -53,7 +53,7 @@ class ElGamalServiceImpl(
 
     override fun check(statement: String, solutionRequest: String): ProblemSubmitResponse {
         val task = objectMapper.readValue(statement, ElGamalTask::class.java)
-        val solution = objectMapper.readValue(statement, ElGamalSolution::class.java)
+        val solution = objectMapper.readValue(solutionRequest, ElGamalSolution::class.java)
         val elGamalVerdict = checkSolution(task, solution)
         return ProblemSubmitResponse(
             isOk = elGamalVerdict.isCorrect,

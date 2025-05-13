@@ -27,7 +27,7 @@ class ProblemAutoFailScheduler(
         }
         val problemSessions = problemSessionDao.findAll()
         for (problemSession in problemSessions) {
-            if(problemSession.problems.all { it.state != ProblemState.NEW } && problemSession.sessionState == ProblemState.NEW) {
+            if(problemSession.problems.none { it.state == ProblemState.NEW } && problemSession.sessionState == ProblemState.NEW) {
                 problemSession.sessionState = ProblemState.SOLVED
             }
             problemSessionDao.save(problemSession)

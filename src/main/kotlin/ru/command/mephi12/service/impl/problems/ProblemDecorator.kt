@@ -75,9 +75,9 @@ class ProblemDecorator(
         val problem =
             problemDao.findById(statementId).orElseThrow { AppException("Задача с id $statementId не найдена") }
         val problemSession = problem.problemSession
-//        problemSession.user.id.takeUnless { it == getPrincipal() }
-//            ?: throw AppException("Вы не решаете набор задач с задачей id $statementId")
-        problemSession.sessionState.takeUnless { it == ProblemState.NEW }
+        problemSession.user.id.takeIf { it == getPrincipal() }
+            ?: throw AppException("Вы не решаете набор задач с задачей id $statementId")
+        problemSession.sessionState.takeIf { it == ProblemState.NEW }
             ?: throw AppException("Набор задач с этой задачей не решается")
         val problemService = problemServices[problem.type.getQualifier()]!!
         val result = problemService.check(problem.statement, request)
